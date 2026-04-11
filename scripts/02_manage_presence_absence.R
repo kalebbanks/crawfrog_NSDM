@@ -1,26 +1,27 @@
 #####################
-#Script: 01_manage_presence_absence.R
+#Script: 02_manage_presence_absence.R
 #Purpose: The purpose of this script is to thin occurrences, generate Pseudo-absence datasets, set aside 20% of occurrences and PA for later testing. Many of these steps can be done more efficiently through the biomod2 package, but I try to stay consistent with the sabinaNSDM package. This script is just an example of how I completed it and you will not be able to generate the exact same PA datasets as I did because there is no ability to set seeds. Instead, you can run the entire code in 03 by loading everything in. 
-#Inputs: 
+#Inputs:data/occurrences_absences
 #Outputs: 
 #Author:Kaleb M. Banks
 #Date: 2025-09-03
 #####################
-
 #packages:
+#install.packages("remotes")
+#remotes::install_github("N-SDM/covsel")
+#remotes::install_github("geoSABINA/sabinaNSDM")
+#install.packages("readxl")
+#install.packages("biomod2")
 library(remotes)
-remotes::install_github("N-SDM/covsel")
 library(covsel)
-remotes::install_github("geoSABINA/sabinaNSDM")
 library(sabinaNSDM)
 library(readxl)
 library(biomod2)
 
 
-
 #####Load occurrences
-regional_occ <- read.csv("data/occurences_absences/occ_raw/regional_survey_occ.csv")
-global_occ <- read.csv("data/occurences_absences/occ_raw/rangewide_gbif_occ.csv")
+regional_occ <- read.csv("data/occurrences_absences/occ_raw/regional_survey_occ.csv")
+global_occ <- read.csv("data/occurrences_absences/occ_raw/rangewide_gbif_occ.csv")
 
 #####Load env var scenarios
 expl.var.global <- rast("data/env_var/scenarios_spatraster/expl.var.global.tif")
@@ -71,9 +72,9 @@ regional_occ_train <- regional_occ_thinned[-test_coords, ]
 
 
 #save thinned and split presences 
-write.csv(regional_occ_test, file = "data/occurences_absences/occ_thinned/regional_occ_test.csv", row.names = FALSE)
-write.csv(regional_occ_train, file = "data/occurences_absences/occ_thinned/regional_occ_train.csv", row.names = FALSE)
-write.csv(global_occ_train, file = "data/occurences_absences/occ_thinned/global_occ_train.csv", row.names = FALSE)
+#write.csv(regional_occ_test, file = "data/occurences_absences/occ_thinned/regional_occ_test.csv", row.names = FALSE)
+#write.csv(regional_occ_train, file = "data/occurences_absences/occ_thinned/regional_occ_train.csv", row.names = FALSE)
+#write.csv(global_occ_train, file = "data/occurences_absences/occ_thinned/global_occ_train.csv", row.names = FALSE)
 
 
 
@@ -205,7 +206,7 @@ for(i in 1:10){
   )
   
   # Extract pseudo-absence points
-  PA_stratified_regional_datasets[[i]] <- nsdm_finput$Background.XY.Regional
+PA_stratified_regional_datasets[[i]] <- nsdm_finput$Background.XY.Regional
 }
 names(PA_stratified_regional_datasets) <- paste0("PA_strat_", 01:10)
 
@@ -214,7 +215,7 @@ names(PA_stratified_regional_datasets) <- paste0("PA_strat_", 01:10)
 
 
 
-#set aside 47 PA for testing
+#set aside PA for testing
 nsdm_finput <- NSDM.FormattingData(nsdm_input,
                                    nPoints = 54, 
                                    Min.Dist.Global = "resolution", 
@@ -225,16 +226,16 @@ nsdm_finput <- NSDM.FormattingData(nsdm_input,
 
 regional_abs_test <- nsdm_finput$Background.XY.Regional
 
-write.csv(regional_abs_test, file = "data/occurences_absences/abs_reg/regional_abs_test_10.csv", row.names = FALSE)
+#write.csv(regional_abs_test, file = "data/occurences_absences/abs_reg/regional_abs_test_10.csv", row.names = FALSE)
 
-#Save all reg PA datasets 
-for (n in names(PA_stratified_regional_datasets)) {
-  df <- PA_stratified_regional_datasets[[n]]
-  write.csv(df, file = file.path("data/occurences_absences/abs_reg/", paste0("reg_", n, ".csv")), row.names = FALSE)
+#Save all regional PA datasets 
+#for (n in names(PA_stratified_regional_datasets)) {
+  #df <- PA_stratified_regional_datasets[[n]]
+  #write.csv(df, file = file.path("data/occurences_absences/abs_reg/", paste0("reg_", n, ".csv")), row.names = FALSE)
 }
 
 #Save all glob PA datasets 
-for (n in names(PA_stratified_global_datasets)) {
-  df <- PA_stratified_global_datasets[[n]]
-  write.csv(df, file = file.path("data/occurences_absences/abs_global/", paste0("glob_", n, ".csv")), row.names = FALSE)
+#for (n in names(PA_stratified_global_datasets)) {
+  #df <- PA_stratified_global_datasets[[n]]
+  #write.csv(df, file = file.path("data/occurences_absences/abs_global/", paste0("glob_", n, ".csv")), row.names = FALSE)
 }
