@@ -1,14 +1,25 @@
+#####################
+#Script: 07_figures.R
+#Purpose: Create figures 4, 6, and supplementary figures. Other figures were created in ARCGIS
+#Inputs: 
+#Outputs: 
+#Author:Kaleb M. Banks
+#Date: 2025-09-30
+#####################
+#packages
+#install.packages("rprojroot")
+#install.packages("biomod2")
+#install.packages("dplyr")
+#install.packages("ggplot2")
+#install.packages("tidyterra")
 library(biomod2)
-install.packages("rprojroot")  # if not installed
 library(rprojroot)
 library(dplyr)
 library(ggplot2)
-install.packages("tidyterra")
 library(tidyterra)
 
 
 #_____Figure 4______#
-
 #####Find response curves
 #First load biomod2 output files for each model. 
 load("Results/Regional/Models/R.areolata/R.areolata.AllModels.ensemble.models.out")
@@ -54,7 +65,6 @@ setwd(find_rstudio_root_file())
 
 setwd("Results/Global/Models/")
 
-
 glob_response_curves <- biomod2::bm_PlotResponseCurves(
   bm.out = glob_ensemble_BIOMOD_output
   , models.chosen = biomod2::get_built_models(glob_ensemble_BIOMOD_output)
@@ -71,14 +81,11 @@ setwd(find_rstudio_root_file())
 response_curves <- rbind(glob_response_curves, reg_response_curves, covar_response_curves)
 
 
-#May have to adjust these
 training_ranges <- data.frame(
   expl.name = c("bio_12", "bio_10", "bio_8", "bio_2", "bio_9"),  # Replace with actual names of expl.name values
   training_min = c(753,24.338,14.579, 12.193, 2.209),         # Replace with actual minimums for each expl.name
   training_max = c(1378,27.876,24.408, 13.840, 25.821)             # Replace with actual maximums for each expl.name
 )
-
-
 
 custom_labels <- c(
   "bio_12" = "Annual rainfall (mm)",
@@ -102,17 +109,6 @@ response_curves$expl.name <- factor(
   response_curves$expl.name, 
   levels = c("bio_12", "bio_10", "bio_9", "bio_8", "bio_2", "percent_prairie", "percent_clay", "SDM.global")  # Define the order you want
 )
-
-
-
-install.packages("extrafont")
-library(extrafont)
-font_import(prompt = FALSE)  # May take a few minutes the first time
-loadfonts(device = "win") 
-
-
-
-
 
 
 ggplot(response_curves, aes(x = expl.val, y = pred.val, color = model)) +
@@ -143,18 +139,17 @@ ggplot(response_curves, aes(x = expl.val, y = pred.val, color = model)) +
         axis.line = element_line(color = "black", linewidth = 0.5)
       )
 
-
 ggsave(
-  filename = "figures/figure_4.png",   # can also use .tiff, .pdf, .jpg, .svg, etc.
-  plot = last_plot(),           # or a ggplot object, e.g. plot = my_plot
-  dpi = 600,                    # resolution (high quality = 300–600)
-  width = 12, height = 7,        # size in inches
+  filename = "figures/figure_4.pdf",
+  plot = last_plot(),
+  device = cairo_pdf,
+  width = 12,
+  height = 7,
   units = "in"
 )
 
+######Table 2: Variable importance scores
 
-
-######Get Variable importance scores
 #Global
 glob_models_var_import <- read.csv("Results/Global/Values/R.areolata_indvar.csv")
 glob_indiv_models <- read.csv("Results/Global/Values/R.areolata_replica.csv")
@@ -185,26 +180,9 @@ covar_models_var_import$full.name %in% covar_indiv_models$full.name,
 ]
 covar_ensemble_var_import <- aggregate(var.imp ~ expl.var, data = covar_models_var_import, FUN = mean, na.rm = TRUE)
 
-
-
-
-
-
-
-
-
 #######Figure 6
 
-#plot to make bar graphs of habitat shifts
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-library(readxl)
-library(extrafont)
-
-
-future_scenarios <- read_excel("outputs/future_scenarios.xlsx")
-future_scenarios <- future_scenarios[-c(19:22), -c(6)]
+#future_scenarios <- read_excel("outputs/future_scenarios.xlsx")
 
 df_long <- future_scenarios %>%
   pivot_longer(cols = c(habitat_gained, habitat_lost, habitat_retained),
@@ -274,10 +252,11 @@ ggplot(df_long, aes(x = Projection, y = value, fill = habitat_change)) +
   )
 
 ggsave(
-  filename = "figures/figure_6.png",   # can also use .tiff, .pdf, .jpg, .svg, etc.
-  plot = last_plot(),           # or a ggplot object, e.g. plot = my_plot
-  dpi = 600,                    # resolution (high quality = 300–600)
-  width = 12, height = 7,        # size in inches
+  filename = "figures/figure_6.pdf",
+  plot = last_plot(),
+  device = cairo_pdf,
+  width = 12,
+  height = 7,
   units = "in"
 )
 
@@ -741,6 +720,7 @@ r_data <- range_wide@proj.out@val
 r_layer <- rast(r_data)
 
 writeRaster(r_layer, filename = "range_wide_sdm.tif")
+
 
 
 
