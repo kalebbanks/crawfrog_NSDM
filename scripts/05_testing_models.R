@@ -1,25 +1,25 @@
 #####################
 #Script: 05_testing_models.R
-#Purpose: train final models after sensitivity analysis
-#Inputs: raster file of current predictions
-#Outputs: excel sheet of model accuracy
+#Purpose: Test models on independent data following model creation. 
+#Inputs: The Biomod results folder that was created in 04. 
+#Outputs: 
 #Author:Kaleb M. Banks
 #Date: 2025-09-23
 #####################
-#install packages 
+#packages
 #install.packages("terra")
 #install.packages("PresenceAbsence")
-
-#packages
+#install packages("dplyr")
 library(terra)
 library(PresenceAbsence)
 library(dplyr)
 
 
 #Test data
-test_abs <- read.csv("data/occurences_absences/abs_reg/regional_abs_test_10.csv")
-test_occ <- read.csv("data/occurences_absences/occ_thinned/regional_occ_test.csv")
+test_abs <- read.csv("data/occurrences_absences/abs_reg/regional_abs_test.csv")
+test_occ <- read.csv("data/occurrences_absences/occ_thinned/regional_occ_test.csv")
 
+#Current predictions
 reg_cur_pred <- rast("Results/Regional/Projections/R.areolata.Current.tif")
 mult_cur_pred <- rast("Results/Multiply/Projections/R.areolata.Current.tif")
 covar_cur_pred <- rast("Results/Covariate/Projections/R.areolata.Current.tif")
@@ -30,7 +30,7 @@ mult_TSS_cutoff <- read.csv("Results/Multiply/Values/R.areolata_ensemble.csv")[3
 covar_TSS_cutoff <- read.csv("Results/Covariate/Values/R.areolata_ensemble.csv")[2, 9]*0.001
 glob_TSS_cutoff <- read.csv("Results/Global/Values/R.areolata_ensemble.csv")[2, 9]*0.001
 
-#####_____Do Regional models
+#####_____Regional models_____
 
 reg_pred <- as.data.frame(reg_cur_pred, cells = TRUE)
 colnames(reg_pred)[1:2] <- c("cell_id", "reg")
@@ -50,7 +50,7 @@ reg_test <- reg_test %>%
 
 reg_accuracy <- presence.absence.accuracy(reg_test, threshold = reg_TSS_cutoff, find.auc = TRUE, st.dev = FALSE)
 
-#####______Do covariate models
+#####______ Covariate model _____
 covar_pred <- as.data.frame(covar_cur_pred, cells = TRUE)
 colnames(covar_pred)[1:2] <- c("cell_id", "covar")
 covar_pred$covar <- pmax(0, covar_pred$covar * 0.001)
@@ -70,7 +70,7 @@ covar_test <- covar_test %>%
 covar_accuracy <- presence.absence.accuracy(covar_test, threshold = covar_TSS_cutoff, find.auc = TRUE, st.dev = FALSE)
 
 
-#####______Do multiply models
+#####______ multiply model _____
 mult_pred <- as.data.frame(mult_cur_pred, cells = TRUE)
 colnames(mult_pred)[1:2] <- c("cell_id", "mult")
 mult_pred$mult <- pmax(0, mult_pred$mult * 0.001)
@@ -91,7 +91,7 @@ mult_test$mult[is.na(mult_test$mult)] <- 0
 
 mult_accuracy <- presence.absence.accuracy(mult_test, threshold = mult_TSS_cutoff, find.auc = TRUE, st.dev = FALSE)
 
-#####______Do Global models
+#####______ Global models _____
 glob_pred <- as.data.frame(glob_cur_pred, cells = TRUE)
 colnames(glob_pred)[1:2] <- c("cell_id", "glob")
 glob_pred$glob <- pmax(0, glob_pred$glob * 0.001)
@@ -137,3 +137,4 @@ accuracy$TSS_cv <- c(glob_cv_TSS,reg_cv_TSS, covar_cv_TSS, mult_cv_tss)
 accuracy$AUC_cv <- c(glob_cv_AUC, reg_cv_AUC, covar_cv_AUC, mult_cv_AUC)
 
 write.csv(accuracy, file = ("Outputs/model_eval.csv"))
+
