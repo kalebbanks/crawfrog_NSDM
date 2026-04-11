@@ -6,7 +6,12 @@
 #Author:Kaleb M. Banks
 #Date: 2025-09-30
 #####################
-install.packages("modEvA")
+#packages
+#install.packages("modEvA")
+#install.packages("ecospat")
+#install.packages("ade4")
+#install.packages("terra")
+#install.packages("dplyr")
 library(modEvA)
 library(ecospat)
 library(ade4)
@@ -26,8 +31,8 @@ future_scenario_6 <- rast("data/env_var/scenarios_spatraster/future_scenario_6.t
 
 
 #####Load all CF occ
-reg_occ <- read.csv("data/occurences_absences/occ_raw/regional_survey_occ.csv")
-glob_occ <- read.csv("data/occurences_absences/occ_raw/rangewide_gbif_occ.csv")
+reg_occ <- read.csv("data/occurrences_absences/occ_raw/regional_survey_occ.csv")
+glob_occ <- read.csv("data/occurrences_absences/occ_raw/rangewide_gbif_occ.csv")
 
 
 #####Extrapolation
@@ -44,7 +49,7 @@ MESS_percent_reg_curr_to_reg_245 <- mean(reg_curr_to_reg_245$TOTAL < 0) * 100
 reg_curr_to_reg_585 <- MESS(reg_curr, reg_585, id.col = NULL, verbosity = 2)
 MESS_percent_reg_curr_to_reg_585 <- mean(reg_curr_to_reg_585$TOTAL < 0) * 100
 
-#To find NSDM extrapolation that use global models to inform preditions 
+
 #compare current global var to future regional var (SSp 245 and SSP 585)
 global_curr <-  as.data.frame(expl.var.global, xy = FALSE, na.rm = TRUE)
 reg_245 <- as.data.frame(future_scenario_1, xy = FALSE, na.rm = TRUE)
@@ -129,5 +134,8 @@ sim_test$obs$unfilling
 
 sim_test$p$unfilling
 #p-value 0.038, this is significant 
+
+
+
 
 
