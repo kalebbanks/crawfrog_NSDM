@@ -1,25 +1,24 @@
 #####################
-#Script: 05_threshold_sensitivty_analysis.R
-#Purpose: Sensitivity analysis for AUC selection, train models
-#Inputs: 
+#Script: 03_threshold_sensitivty_analysis.R
+#Purpose: The purpose of this sensitivity analysis is decide what selection threshold and precense absence dataset to use for our final models. Details are in supplementary files section 1/ 
+#Inputs: data/occurrences_absences
+#        data/env_var
 #Outputs: 
 #Author:Kaleb M. Banks
 #Date: 2025-09-03
 #####################
-#install packages: 
-install.packages("remotes")
-remotes::install_github("N-SDM/covsel")
-remotes::install_github("geoSABINA/sabinaNSDM")
-
-
-install.packages("terra")
-install.packages("biomod2")
-install.packages("PresenceAbsence")
-
-
-
-
-#packages:
+#packages: 
+#install.packages("remotes")
+#remotes::install_github("N-SDM/covsel")
+#remotes::install_github("geoSABINA/sabinaNSDM")
+#install.packages("terra")
+#install.packages("biomod2")
+#install.packages("sp")
+#install.packages("raster")
+#install.packages("dplyr")
+#install.packages("PresenceAbsence")
+#install.packages("ggplot2")
+#install.packages("tidyr")
 library(remotes)
 library(covsel)
 library(sabinaNSDM)
@@ -30,43 +29,42 @@ library(raster)
 library(dplyr)
 library(PresenceAbsence)
 library(ggplot2)
-library(dplyr)
 library(tidyr)
 
 
 #####Load occurrences
-R.areolata_reg_train_occ <- read.csv("data/occurences_absences/occ_thinned/regional_occ_train.csv")
-R.areolata_glob_train_occ <- read.csv("data/occurences_absences/occ_thinned/global_occ_train.csv")
+R.areolata_reg_train_occ <- read.csv("data/occurrences_absences/occ_thinned/regional_occ_train.csv")
+R.areolata_glob_train_occ <- read.csv("data/occurrences_absences/occ_thinned/global_occ_train.csv")
 
 #####Load pseudo-absences
-global_PA_1_train <- read.csv("data/occurences_absences/abs_global/glob_PA_strat_1.csv")
-global_PA_2_train <- read.csv("data/occurences_absences/abs_global/glob_PA_strat_2.csv")
-global_PA_3_train <- read.csv("data/occurences_absences/abs_global/glob_PA_strat_3.csv")
-global_PA_4_train <- read.csv("data/occurences_absences/abs_global/glob_PA_strat_4.csv")
-global_PA_5_train <- read.csv("data/occurences_absences/abs_global/glob_PA_strat_5.csv")
-global_PA_6_train <- read.csv("data/occurences_absences/abs_global/glob_PA_strat_6.csv")
-global_PA_7_train <- read.csv("data/occurences_absences/abs_global/glob_PA_strat_7.csv")
-global_PA_8_train <- read.csv("data/occurences_absences/abs_global/glob_PA_strat_8.csv")
-global_PA_9_train <- read.csv("data/occurences_absences/abs_global/glob_PA_strat_9.csv")
-global_PA_10_train <- read.csv("data/occurences_absences/abs_global/glob_PA_strat_10.csv")
+global_PA_1_train <- read.csv("data/occurrences_absences/abs_global/glob_PA_strat_1.csv")
+global_PA_2_train <- read.csv("data/occurrences_absences/abs_global/glob_PA_strat_2.csv")
+global_PA_3_train <- read.csv("data/occurrences_absences/abs_global/glob_PA_strat_3.csv")
+global_PA_4_train <- read.csv("data/occurrences_absences/abs_global/glob_PA_strat_4.csv")
+global_PA_5_train <- read.csv("data/occurrences_absences/abs_global/glob_PA_strat_5.csv")
+global_PA_6_train <- read.csv("data/occurrences_absences/abs_global/glob_PA_strat_6.csv")
+global_PA_7_train <- read.csv("data/occurrences_absences/abs_global/glob_PA_strat_7.csv")
+global_PA_8_train <- read.csv("data/occurrences_absences/abs_global/glob_PA_strat_8.csv")
+global_PA_9_train <- read.csv("data/occurrences_absences/abs_global/glob_PA_strat_9.csv")
+global_PA_10_train <- read.csv("data/occurrences_absences/abs_global/glob_PA_strat_10.csv")
 
 
-regional_PA_1_train <- read.csv("data/occurences_absences/abs_reg/reg_PA_strat_1.csv")
-regional_PA_2_train <- read.csv("data/occurences_absences/abs_reg/reg_PA_strat_2.csv")
-regional_PA_3_train <- read.csv("data/occurences_absences/abs_reg/reg_PA_strat_3.csv")
-regional_PA_4_train <- read.csv("data/occurences_absences/abs_reg/reg_PA_strat_4.csv")
-regional_PA_5_train <- read.csv("data/occurences_absences/abs_reg/reg_PA_strat_5.csv")
-regional_PA_6_train <- read.csv("data/occurences_absences/abs_reg/reg_PA_strat_6.csv")
-regional_PA_7_train <- read.csv("data/occurences_absences/abs_reg/reg_PA_strat_7.csv")
-regional_PA_8_train <- read.csv("data/occurences_absences/abs_reg/reg_PA_strat_8.csv")
-regional_PA_9_train <- read.csv("data/occurences_absences/abs_reg/reg_PA_strat_9.csv")
-regional_PA_10_train <- read.csv("data/occurences_absences/abs_reg/reg_PA_strat_10.csv")
+regional_PA_1_train <- read.csv("data/occurrences_absences/abs_reg/reg_PA_strat_1.csv")
+regional_PA_2_train <- read.csv("data/occurrences_absences/abs_reg/reg_PA_strat_2.csv")
+regional_PA_3_train <- read.csv("data/occurrences_absences/abs_reg/reg_PA_strat_3.csv")
+regional_PA_4_train <- read.csv("data/occurrences_absences/abs_reg/reg_PA_strat_4.csv")
+regional_PA_5_train <- read.csv("data/occurrences_absences/abs_reg/reg_PA_strat_5.csv")
+regional_PA_6_train <- read.csv("data/occurrences_absences/abs_reg/reg_PA_strat_6.csv")
+regional_PA_7_train <- read.csv("data/occurrences_absences/abs_reg/reg_PA_strat_7.csv")
+regional_PA_8_train <- read.csv("data/occurrences_absences/abs_reg/reg_PA_strat_8.csv")
+regional_PA_9_train <- read.csv("data/occurrences_absences/abs_reg/reg_PA_strat_9.csv")
+regional_PA_10_train <- read.csv("data/occurrences_absences/abs_reg/reg_PA_strat_10.csv")
 
 #####Load Test Pseduo-absences
-regional_abs_test <- read.csv("data/occurences_absences/abs_reg/regional_abs_test.csv")
+regional_abs_test <- read.csv("data/occurrences_absences/abs_reg/regional_abs_test.csv")
 
-######Load test occurences
-R.areolata_reg_test_occ <- read.csv("data/occurences_absences/occ_thinned/regional_occ_test.csv")
+######Load test occurrences
+R.areolata_reg_test_occ <- read.csv("data/occurrences_absences/occ_thinned/regional_occ_test.csv")
 
 
 #####Load env var
@@ -79,7 +77,7 @@ future_scenario_4 <- rast("data/env_var/scenarios_spatraster/future_scenario_4.t
 future_scenario_5 <- rast("data/env_var/scenarios_spatraster/future_scenario_5.tif")
 future_scenario_6 <- rast("data/env_var/scenarios_spatraster/future_scenario_6.tif")
 
-################Regional threshold analysis######################################
+###############Regional threshold analysis#####################################
 regional_PA_list <- list(regional_PA_1_train, regional_PA_2_train,regional_PA_3_train,regional_PA_4_train,regional_PA_5_train, regional_PA_6_train, regional_PA_7_train, regional_PA_8_train, regional_PA_9_train, regional_PA_10_train)
 
 thresholds <- seq(0.50, 0.95, by = 0.05)
@@ -188,7 +186,7 @@ for(i in seq_along(regional_PA_list)) {
         
         if (all(is.na(test_df$pred))) stop("All predicted values are NA for this model")
         
-        # ---- compute test accuracy ----
+        # ---- compute test meterics ----
         accuracy <- presence.absence.accuracy(test_df, threshold = TSS_cutoff, find.auc = TRUE)
         
         sen  <- as.numeric(accuracy[1, 4])
@@ -248,7 +246,7 @@ for(i in seq_along(regional_PA_list)) {
 
 regional_sens_results <- regional_sens_results[ , -9]
 
-write.csv(regional_sens_results, "outputs/regional_sens_results_3.csv")
+#write.csv(regional_sens_results, "outputs/regional_sens_results_3.csv")
 
 
 
@@ -360,7 +358,7 @@ for(i in seq_along(global_PA_list)) {
         
         if (all(is.na(test_df$pred))) stop("All predicted values are NA for this model")
         
-        # ---- compute test accuracy ----
+        # ---- compute test metrics ----
         accuracy <- presence.absence.accuracy(test_df, threshold = TSS_cutoff, find.auc = TRUE)
         
         sen  <- as.numeric(accuracy[1, 4])
@@ -420,7 +418,7 @@ for(i in seq_along(global_PA_list)) {
 
 global_sens_results <- global_sens_results[ , -9]
 
-write.csv(global_sens_results, "outputs/global_sens_results_3.csv")
+#write.csv(global_sens_results, "outputs/global_sens_results_3.csv")
 
 global_sens_results <- global_sens_results %>% filter(skipped == FALSE)
 
@@ -430,9 +428,6 @@ global_sens_results_long <- global_sens_results %>%
                values_to = "value")
 
 
-#####################################################################
-glob_sens_results <- read.csv("outputs/global_sens_results.csv")
-reg_sens_results <- read.csv("outputs/regional_sens_results.csv")
 
 reg_summary <- reg_sens_results%>%
   group_by(threshold) %>%
@@ -453,3 +448,4 @@ glob_summary <- glob_sens_results%>%
 glob_sens_results_085 <- glob_sens_results[glob_sens_results$threshold == 0.85, ]
 reg_sens_results_085 <- reg_sens_results[reg_sens_results$threshold == 0.80, ]
 #PA dataset 1, is best AUC Eval score for both regional and global models
+
