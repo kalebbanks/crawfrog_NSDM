@@ -191,8 +191,8 @@ plot(terra::unwrap(nsdm_covariate$new.projections$Pred.bin.TSS.Scenario[[6]]))
 
 nsdm_multiply <- NSDM.Multiply(nsdm_global,
                                nsdm_regional,
-                               method = "Geometric", # method for averaging global and regional model outputs: "Arithmetic" or "Geometric"
-                               rescale = FALSE, # whether to rescale global and regional model predictions before combining them
+                               method = "Geometric", 
+                               rescale = FALSE, 
                                save.output=TRUE)
 
 
